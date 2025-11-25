@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Page background & text color */
+body {
+  @apply bg-gray-100 text-gray-800; /* light gray background, dark text */
+}
+
+/* Links hover effect */
+a {
+  @apply transition-colors duration-300;
+}
+
+a:hover {
+  @apply text-blue-600;
+}
+
+/* Buttons default style */
+button {
+  @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700;
+}
+
+/* Inputs */
+input {
+  @apply border border-gray-300 rounded px-3 py-2 focus:border-blue-500 focus:ring focus:ring-blue-200;
+}
+
+/* Header and footer default colors (optional) */
+header {
+  @apply bg-blue-600 text-white;
+}
+
+footer {
+  @apply bg-gray-900 text-white;
+}
