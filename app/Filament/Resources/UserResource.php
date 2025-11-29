@@ -2,87 +2,85 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
+use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Resources\UserResource\RelationManagers\OrdersRelationManager;
+use Filament\Forms\Components\DateTimePicker;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    // Sidebar icon (solid user)
-    protected static ?string $navigationIcon = 'heroicon-s-user';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    // Optional: sidebar label and group
-    protected static ?string $navigationLabel = 'Users';
-    protected static ?string $navigationGroup = 'Admin';
+    protected static ?string $recordTitleAttribute = 'name'; //berguna untuk global search (secara keseluruhan)
+
+    protected static ?int $navigationSort = 1; //berguna untuk mengurutkan menu navigasi
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-
-                Forms\Components\TextInput::make('email')
-                    ->label('Email Address')
-                    ->email()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true)
+                TextInput::make('name')
                     ->required(),
 
-                Forms\Components\DateTimePicker::make('email_verified_at')
+                TextInput::make('email')
+                    ->label('Email Address')
+                    ->required()
+                    ->email()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
+
+
+                DateTimePicker::make('email_verified_at')
                     ->label('Email Verified At')
                     ->default(now()),
 
-                Forms\Components\TextInput::make('password')
+                TextInput::make('password')
                     ->password()
-                    ->dehydrated(fn($state) => filled($state)) // only save if not empty
-                    ->required(fn($livewire): bool => $livewire instanceof Pages\CreateUser), // required only on create
+                    ->dehydrated(fn($state) => filled($state)) // input password hanya akan dihydrate (nilainya akan diambil) jika pengguna telah memasukkan nilai ke dalam field tersebut
+                    ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord),
             ]);
     }
-
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Name')
+                TextColumn::make('name')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('email')
-                    ->label('Email')
+                TextColumn::make('email')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->label('Email Verified At')
+                TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
-
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ]),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -94,8 +92,13 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            OrdersRelationManager::class
         ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email'];
     }
 
     public static function getPages(): array
