@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Address;
+use App\Models\address;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Livewire\Attributes\Title;
@@ -19,7 +19,7 @@ class MyOrderDetailPage extends Component
     public function render()
     {
         $order_items = OrderItem::with('product')->where('order_id', $this->order_id)->get();
-        $address = Address::where('order_id', $this->order_id)->first();
+        $address = address::where('order_id', $this->order_id)->first();
         $order = Order::where('id', $this->order_id)->first();
 
         return view('livewire.my-order-detail-page', [
