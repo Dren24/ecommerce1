@@ -14,6 +14,11 @@ class ProductDetailPage extends Component
     public $slug;
     public $quantity = 1;
 
+    public function mount($slug)
+    {
+        $this->slug = $slug;
+    }
+
     public function incrementQty()
     {
         $this->quantity++;
@@ -28,24 +33,21 @@ class ProductDetailPage extends Component
 
     public function addToCart($product_id)
     {
-        $total_count = CartManagement::addItemsToCartWithQty($product_id, $this->quantity);
+        // FIX ❗ Correct function name. No "WithQty"
+        $total_count = CartManagement::addItemsToCart($product_id, $this->quantity);
 
-        // Update cart count in Navbar
-        $this->dispatch('update-cart-count', total_count: $total_count)->to(Navbar::class);
+        // Update navbar cart count
+        $this->dispatch('update-cart-count', total_count: $total_count)
+            ->to(Navbar::class);
 
-        // LivewireAlert v3 syntax using facade
-        LivewireAlert::alert([
-            'type' => 'success',
-            'position' => 'top-end',
-            'timer' => 3000,
-            'toast' => true,
-            'text' => 'Product added to cart successfully!',
-        ]);
-    }
-
-    public function mount($slug)
-    {
-        $this->slug = $slug;
+        // FIX ❗ Updated Alert syntax to LivewireAlert v4
+        LivewireAlert::title('Success')
+            ->text('Product added to cart successfully!')
+            ->success()
+            ->toast()
+            ->position('top-end')
+            ->timer(3000)
+            ->show();
     }
 
     #[Title('Product Detail Page')]

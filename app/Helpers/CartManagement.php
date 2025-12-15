@@ -7,34 +7,31 @@ use Illuminate\Support\Facades\Cookie;
 
 class CartManagement
 {
-    // Add item to cart (increase quantity if exists)
+    // Add item to cart or increase quantity
     public static function addItemsToCart($product_id, $qty = 1)
     {
         $cart_items = self::getCartItemsFromCookie();
-        $existing_item = null;
+        $found = false;
 
-        // Find if product already exists in cart
         foreach ($cart_items as $key => $item) {
             if ($item['product_id'] == $product_id) {
-                $existing_item = $key;
+                $cart_items[$key]['quantity'] += $qty;
+                $cart_items[$key]['total_amount'] = $cart_items[$key]['quantity'] * $cart_items[$key]['unit_amount'];
+                $found = true;
                 break;
             }
         }
 
-        if ($existing_item !== null) {
-            // Increase quantity if item exists
-            $cart_items[$existing_item]['quantity'] += $qty;
-            $cart_items[$existing_item]['total_amount'] = $cart_items[$existing_item]['quantity'] * $cart_items[$existing_item]['unit_amount'];
-        } else {
-            // Add new product to cart
+        if (!$found) {
             $product = Product::find($product_id, ['id', 'name', 'image', 'price']);
+
             if ($product) {
                 $cart_items[] = [
-                    'product_id' => $product_id,
-                    'name' => $product->name,
-                    'image' => $product->image[0],
-                    'quantity' => $qty,
-                    'unit_amount' => $product->price,
+                    'product_id'   => $product_id,
+                    'name'         => $product->name,
+                    'image'        => $product->image[0] ?? null,
+                    'quantity'     => $qty,
+                    'unit_amount'  => $product->price,
                     'total_amount' => $product->price * $qty,
                 ];
             }
@@ -42,11 +39,11 @@ class CartManagement
 
         self::addCartItemsToCookie($cart_items);
 
-        // FIX: Return total quantity instead of count
+        // Return total quantity (NOT item count)
         return self::getTotalQuantity($cart_items);
     }
 
-    // Remove item from cart
+    // Remove Cart Item
     public static function removeCartItem($product_id)
     {
         $cart_items = self::getCartItemsFromCookie();
@@ -57,13 +54,13 @@ class CartManagement
             }
         }
 
-        $cart_items = array_values($cart_items); // Reindex array
+        $cart_items = array_values($cart_items);
         self::addCartItemsToCookie($cart_items);
 
         return $cart_items;
     }
 
-    // Increase item quantity
+    // Increment quantity
     public static function incrementQuantityToCartItem($product_id)
     {
         $cart_items = self::getCartItemsFromCookie();
@@ -79,7 +76,7 @@ class CartManagement
         return $cart_items;
     }
 
-    // Decrease item quantity
+    // Decrement quantity
     public static function decrementQuantityToCartItem($product_id)
     {
         $cart_items = self::getCartItemsFromCookie();
@@ -95,38 +92,33 @@ class CartManagement
         return $cart_items;
     }
 
-    // Get cart items from cookie (sanitized)
+    // Get cart items safely
     public static function getCartItemsFromCookie()
     {
         $cart_items = json_decode(Cookie::get('cart_items'), true);
 
-        // FIX: ensure it's an array, prevent invalid cookie data
-        if (!$cart_items || !is_array($cart_items)) {
-            $cart_items = [];
-        }
-
-        return $cart_items;
+        return is_array($cart_items) ? $cart_items : [];
     }
 
-    // Add/update cart items in cookie
+    // Save to cookie
     public static function addCartItemsToCookie($cart_items)
     {
         Cookie::queue('cart_items', json_encode($cart_items), 60 * 24 * 30);
     }
 
-    // Clear cart items from cookie
+    // Clear Cart
     public static function clearCartItems()
     {
         Cookie::queue(Cookie::forget('cart_items'));
     }
 
-    // Calculate grand total
+    // Grand Total
     public static function calculateGrandTotal($cart_items)
     {
         return array_sum(array_column($cart_items, 'total_amount'));
     }
 
-    // FIX: Get total quantity of all items in cart
+    // Get TOTAL quantity of all items
     public static function getTotalQuantity($cart_items = null)
     {
         if ($cart_items === null) {

@@ -8,7 +8,6 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Set;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
@@ -25,39 +24,48 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    // Change the sidebar icon here
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    // Sidebar icon for part categories
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make([
-                    Grid::make()
-                        ->schema([
-                            TextInput::make('name')
-                                ->required()
-                                ->maxLength(225)
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function ($state, callable $set, string $operation) {
-                                    if ($operation === 'create') {
-                                        $set('slug', Str::slug($state));
-                                    }
-                                }),
-                            TextInput::make('slug')
-                                ->disabled()
-                                ->required()
-                                ->dehydrated()
-                                ->unique(Category::class, 'slug', ignoreRecord: true),
-                        ]),
-                    FileUpload::make('image')
-                        ->image()
-                        ->directory('categories'),
-                    Toggle::make('is_active')
-                        ->required()
-                        ->default(true),
-                ])
+                Section::make('Category Information')
+                    ->schema([
+                        Grid::make()
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Category Name')
+                                    ->required()
+                                    ->maxLength(225)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (string $operation, $state, callable $set) {
+                                        if ($operation === 'create') {
+                                            $set('slug', Str::slug($state));
+                                        }
+                                    }),
+
+                                TextInput::make('slug')
+                                    ->label('Slug')
+                                    ->disabled()
+                                    ->required()
+                                    ->dehydrated()
+                                    ->unique(Category::class, 'slug', ignoreRecord: true),
+                            ]),
+
+                        FileUpload::make('image')
+                            ->label('Category Image')
+                            ->image()
+                            ->directory('categories'),
+
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true)
+                            ->required(),
+                    ])
             ]);
     }
 
@@ -65,14 +73,27 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable(),
-                Tables\Columns\TextColumn::make('slug')->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
-                Tables\Columns\IconColumn::make('is_active')->boolean(),
+                Tables\Columns\ImageColumn::make('image')
+                    ->label('Image')
+                    ->circular(),
+
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Category')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('slug')
+                    ->toggleable()
+                    ->searchable(),
+
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -94,17 +115,15 @@ class CategoryResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
+            'index'  => Pages\ListCategories::route('/'),
             'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            'edit'   => Pages\EditCategory::route('/{record}/edit'),
         ];
     }
 }

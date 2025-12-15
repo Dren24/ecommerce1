@@ -8,18 +8,18 @@ use Livewire\Component;
 
 class Navbar extends Component
 {
-
-    public $total_count = 0;
+    public int $total_count = 0;
 
     public function mount()
     {
+        // Safely count cart items from cookie
         $this->total_count = count(CartManagement::getCartItemsFromCookie());
     }
 
     #[On('update-cart-count')]
-    public function updateCartCount($total_count)
+    public function updateCartCount(int $total)
     {
-        $this->total_count = $total_count;
+        $this->total_count = $total;
     }
 
     public function render()

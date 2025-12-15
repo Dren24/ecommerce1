@@ -2,57 +2,54 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
-use Filament\Forms;
 use App\Models\User;
+use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Pages\Page;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Resources\UserResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Filament\Resources\UserResource\RelationManagers\OrdersRelationManager;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\Page;
+use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers\OrdersRelationManager;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-
-    protected static ?string $recordTitleAttribute = 'name'; //berguna untuk global search (secara keseluruhan)
-
-    protected static ?int $navigationSort = 1; //berguna untuk mengurutkan menu navigasi
+    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
 
                 TextInput::make('email')
                     ->label('Email Address')
                     ->required()
                     ->email()
-                    ->maxLength(255)
                     ->unique(ignoreRecord: true),
-
 
                 DateTimePicker::make('email_verified_at')
                     ->label('Email Verified At')
-                    ->default(now()),
+                    ->nullable(),
 
                 TextInput::make('password')
                     ->password()
-                    ->dehydrated(fn($state) => filled($state)) // input password hanya akan dihydrate (nilainya akan diambil) jika pengguna telah memasukkan nilai ke dalam field tersebut
-                    ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord),
+                    ->revealable()
+                    ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord)
+                    ->dehydrated(fn($state): bool => filled($state))
+                    ->minLength(6)
+                    ->maxLength(255),
             ]);
     }
 
@@ -60,11 +57,14 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('email')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('email_verified_at')
                     ->dateTime()
@@ -74,14 +74,13 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
+
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -92,7 +91,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            OrdersRelationManager::class
+            OrdersRelationManager::class,
         ];
     }
 
@@ -104,9 +103,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
+            'index'  => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'edit'   => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

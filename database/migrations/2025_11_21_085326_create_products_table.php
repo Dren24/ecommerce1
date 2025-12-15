@@ -10,24 +10,28 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            
-            // foreign keys first
+
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('brand_id')->nullable()->constrained()->nullOnDelete();
-            
+            $table->foreignId('supplier_id')->nullable()->constrained()->nullOnDelete();
+
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->integer('stock')->default(0);
-            $table->json('image')->nullable(); // changed to JSON
-            
-            // boolean columns
+
+            $table->integer('quantity')->default(0);
+            $table->integer('minimum_quantity')->default(1);
+
+            $table->string('part_number')->nullable();
+            $table->string('motorcycle_brand')->nullable();
+            $table->string('fit_to_model')->nullable();
+
+            $table->decimal('cost_price', 10, 2)->nullable();
+            $table->decimal('selling_price', 10, 2);
+
+            $table->string('image')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_featured')->default(false);
-            $table->boolean('in_stock')->default(true);
-            $table->boolean('on_sale')->default(false);
-            
+
             $table->timestamps();
         });
     }

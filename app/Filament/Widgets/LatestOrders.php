@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Tables;
 use App\Models\Order;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -12,42 +12,51 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestOrders extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
     protected static ?int $sort = 2;
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(OrderResource::getEloquentQuery()) // getEloquentQuery() adalah query yang digunakan dalam resource filament
-            ->defaultPaginationPageOption(5) //berguna untuk mengatur nomor halaman default
-            ->defaultSort('created_at', 'desc') //berguna untuk mengatur urutan default
+            ->query(OrderResource::getEloquentQuery())
+            ->defaultPaginationPageOption(5)
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('id')
-                    ->searchable()
-                    ->label('Order ID'),
 
-                TextColumn::make('user.name') //mengambil relationship dari model user yg sudah di Eloquent: Relationships pada Model Order
+                TextColumn::make('id')
+                    ->label('Order ID')
+                    ->sortable()
                     ->searchable(),
 
+                TextColumn::make('user.name')
+                    ->label('Customer')
+                    ->sortable()
+                    ->searchable()
+                    ->placeholder('Unknown User'),
+
                 TextColumn::make('grand_total')
-                    ->money('IDR'),
+                    ->label('Total')
+                    ->money('IDR')
+                    ->sortable(),
 
                 TextColumn::make('status')
                     ->badge()
+                    ->sortable()
                     ->color(fn(string $state): string => match ($state) {
                         'new' => 'info',
-                        'processing' => 'primary',
-                        'shipped' => 'success',
+                        'processing' => 'warning',
+                        'shipped' => 'gray',
                         'delivered' => 'success',
                         'cancelled' => 'danger',
+                        default => 'secondary',
                     })
-
                     ->icon(fn(string $state): string => match ($state) {
-
                         'new' => 'heroicon-m-sparkles',
                         'processing' => 'heroicon-m-arrow-path',
                         'shipped' => 'heroicon-o-truck',
-                        'deliverd' => 'heroicon-m-check-badge',
+                        'delivered' => 'heroicon-m-check-badge',
                         'cancelled' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-question-mark-circle',
                     }),
 
                 TextColumn::make('payment_method')
@@ -55,18 +64,22 @@ class LatestOrders extends BaseWidget
                     ->searchable(),
 
                 TextColumn::make('payment_status')
-                    ->sortable()
                     ->badge()
-                    ->searchable(),
+                    ->sortable()
+                    ->searchable()
+                    ->color(fn(string $state) => $state == 'paid' ? 'success' : 'danger'),
 
                 TextColumn::make('created_at')
                     ->label('Order Date')
-                    ->dateTime('d M, Y H:i A')
+                    ->dateTime('d M Y, h:i A')
+                    ->sortable(),
             ])
+
             ->actions([
-                Action::make('View Order')
+                Action::make('View')
                     ->url(fn(Order $record): string => OrderResource::getUrl('view', ['record' => $record]))
                     ->icon('heroicon-o-eye')
+                    ->color('primary'),
             ]);
     }
 }

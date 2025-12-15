@@ -10,32 +10,40 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'brand_id', 'name', 'slug', 'description',
-        'price', 'stock', 'image', 'is_active', 'is_featured', 'in_stock', 'on_sale'
+        'category_id',
+        'brand_id',
+        'supplier_id',
+        'name',
+        'slug',
+        'description',
+        'quantity',
+        'minimum_quantity',
+        'part_number',
+        'motorcycle_brand',
+        'fit_to_model',
+        'cost_price',
+        'selling_price',
+        'image',
+        'is_active',
     ];
 
-    // cast image JSON to array automatically
     protected $casts = [
-        'image' => 'array',
+        'image' => 'string',
         'is_active' => 'boolean',
-        'is_featured' => 'boolean',
-        'in_stock' => 'boolean',
-        'on_sale' => 'boolean',
-        'price' => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
-
     public function brand()
     {
         return $this->belongsTo(Brand::class);
     }
-
-    public function orderItems()
+    public function supplier()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->belongsTo(Supplier::class);
     }
 }

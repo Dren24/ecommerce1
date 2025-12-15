@@ -3,8 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
-use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
 use App\Models\Order;
 use App\Models\Product;
 use Filament\Forms;
@@ -16,8 +14,6 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
@@ -26,253 +22,164 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Number;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-receipt-refund';
+    protected static ?int $navigationSort = 6;
 
-    protected static ?int $navigationSort = 5;
-
-    public static function form(Form $form): Form
+    public static function form(Forms\Form $form): Forms\Form
     {
-        return $form
-            ->schema([
-                Group::make()
-                    ->schema([
-                        Section::make('Order Information')
-                            ->schema([
-                                Select::make('user_id')
-                                    ->required()
-                                    ->preload()
-                                    ->searchable()
-                                    ->relationship('user', 'name'),
+        return $form->schema([
+            Group::make()
+                ->schema([
 
-                                Select::make('payment_method')
-                                    ->options([
-                                        'stripe' => 'Stripe',
-                                        'cod' => 'Cash on delivery',
-                                    ])
-                                    ->required(),
+                    Section::make('Order Information')
+                        ->schema([
 
-                                Select::make('payment_status')
-                                    ->options([
-                                        'pending' => 'Pending',
-                                        'paid' => 'Paid',
-                                        'failed' => 'Failed',
-                                    ])
-                                    ->required()
-                                    ->default('pending'),
+                            TextInput::make('customer_name')
+                                ->label('Customer Name')
+                                ->placeholder('Walk-in / Optional')
+                                ->maxLength(255)
+                                ->nullable(),
 
-                                ToggleButtons::make('status')
-                                    ->options([
-                                        'new' => 'New',
-                                        'processing' => 'Processing',
-                                        'shipped' => 'Shipped',
-                                        'delivered' => 'Deliverd',
-                                        'canceled' => 'Cancelled',
-                                    ])
-                                    ->colors([
-                                        'new' => 'info',
-                                        'processing' => 'warning',
-                                        'shipped' => 'success',
-                                        'deliverd' => 'success',
-                                        'cancelled' => 'danger',
-                                    ])
-                                    ->icons([
-                                        'new' => 'heroicon-m-sparkles',
-                                        'processing' => 'heroicon-m-arrow-path',
-                                        'shipped' => 'heroicon-o-truck',
-                                        'deliverd' => 'heroicon-m-check-badge',
-                                        'cancelled' => 'heroicon-o-x-circle',
-                                    ])
-                                    ->required()
-                                    ->default('new')
-                                    ->inline(),
+                            Select::make('status')
+                                ->label('Order Status')
+                                ->options([
+                                    'new' => 'New',
+                                    'completed' => 'Completed',
+                                    'cancelled' => 'Cancelled',
+                                ])
+                                ->default('new')
+                                ->required(),
 
-                                Select::make('currency')
-                                    ->options([
-                                        'idr' => 'Indonesian Rupiah (Rp)',
-                                        'usd' => 'United States Dollar (USD)',
-                                        'eur' => 'Euro (EUR)',
+                            Textarea::make('notes')
+                                ->placeholder('Notes (optional)')
+                                ->columnSpanFull(),
 
-                                    ])
-                                    ->required()
-                                    ->default('idr'),
+                        ])->columns(2),
 
-                                Select::make('shipping_method')
-                                    ->options([
-                                        'fedex' => 'FedEx',
-                                        'jne' => 'JNE',
-                                        'sicepat' => 'Sicepat',
-                                    ]),
+                    Section::make('Order Items')
+                        ->schema([
 
-                                Textarea::make('notes')
-                                    ->columnSpanFull()
-                            ])->columns(2),
+                            Repeater::make('items')
+                                ->relationship()
+                                ->schema([
 
-                        Section::make('Order Items')
-                            ->schema([
+                                    Select::make('product_id')
+                                        ->label('Product')
+                                        ->required()
+                                        ->relationship('product', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, Set $set) {
+                                            $product = Product::find($state);
+                                            $set('unit_price', $product?->selling_price ?? 0);
+                                            $set('total_price', $product?->selling_price ?? 0);
+                                        })
+                                        ->columnSpan(6),
 
-                                Repeater::make('items')
-                                    ->relationship()
-                                    ->schema([
-                                        Select::make('product_id')
-                                            ->required()
-                                            ->relationship('product', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->distinct()
-                                            ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                                            ->reactive()
-                                            ->afterStateUpdated(fn($state, Set $set) => $set('unit_amount', Product::find($state)?->price ?? 0))
-                                            ->afterStateUpdated(fn($state, Set $set) => $set('total_amount', Product::find($state)?->price ?? 0))
-                                            ->columnSpan(4),
+                                    TextInput::make('quantity')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(1)
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                            $set('total_price', $state * $get('unit_price'));
+                                        })
+                                        ->columnSpan(3),
 
+                                    TextInput::make('unit_price')
+                                        ->label('Unit Price')
+                                        ->numeric()
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->columnSpan(3),
 
-                                        TextInput::make('quantity')
-                                            ->required()
-                                            ->minValue(1)
-                                            ->numeric()
-                                            ->default(1)
-                                            ->reactive()
-                                            ->afterStateUpdated(fn($state, Set $set, Get $get) => $set('total_amount', $state * $get('unit_amount')))
-                                            ->columnSpan(2),
+                                    TextInput::make('total_price')
+                                        ->numeric()
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->label('Total')
+                                        ->columnSpan(3),
 
-                                        TextInput::make('unit_amount')
-                                            ->required()
-                                            ->numeric()
-                                            ->disabled()
-                                            ->dehydrated()
-                                            ->columnSpan(3),
+                                ])
+                                ->columns(12),
 
-                                        TextInput::make('total_amount')
-                                            ->required()
-                                            ->numeric()
-                                            ->dehydrated()
-                                            ->columnSpan(3),
-                                    ])->columns(12),
+                            Placeholder::make('grand_total_placeholder')
+                                ->label('Grand Total')
+                                ->content(function (Get $get, Set $set) {
+                                    $total = 0;
 
+                                    foreach ($get('items') ?? [] as $item) {
+                                        $total += ($item['total_price'] ?? 0);
+                                    }
 
-                                Placeholder::make('grand_total_placeholder')
-                                    ->label('Grand Total')
-                                    ->content(function (Get $get, Set $set) {
-                                        $total = 0;
+                                    $set('grand_total', $total);
+                                    return Number::currency($total, 'PHP');
+                                }),
 
-                                        if (!$repeaters = $get('items')) {
-                                            return $total;
-                                        }
+                            Hidden::make('grand_total')
+                                ->default(0),
 
+                        ]),
 
-                                        foreach ($repeaters as $item) {
-                                            $total += $item['total_amount'];
-                                        }
+                ])->columnSpanFull()
 
-                                        $set('grand_total', $total);
-                                        return Number::currency($total, 'IDR');
-                                    }),
-
-                                Hidden::make('grand_total')
-                                    ->required()
-                                    ->default(0)
-                            ])
-
-                    ])->columnSpanFull()
-            ]);
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+
+                TextColumn::make('customer_name')
                     ->label('Customer')
-                    ->searchable()
-                    ->sortable(),
+                    ->placeholder('Walk-in')
+                    ->searchable(),
 
                 TextColumn::make('grand_total')
-                    ->label('Grand Total')
-                    ->sortable()
-                    ->money('IDR'),
+                    ->label('Total')
+                    ->money('PHP')
+                    ->sortable(),
 
-                TextColumn::make('payment_method')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('payment_status')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('currency')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('shipping_method')
-                    ->sortable()
-                    ->searchable(),
-
-                SelectColumn::make('status')
-                    ->options([
-                        'new' => 'New',
-                        'processing' => 'Processing',
-                        'shipped' => 'Shipped',
-                        'delivered' => 'Delivered',
-                        'canceled' => 'cancelled',
+                TextColumn::make('status')
+                    ->badge()
+                    ->colors([
+                        'primary' => 'new',
+                        'success' => 'completed',
+                        'danger' => 'cancelled',
                     ])
-                    ->searchable()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Date')
+                    ->dateTime('M d, Y — h:i A')
+                    ->sortable(),
 
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-
-            ])
-            ->filters([
-                //
             ])
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            AddressRelationManager::class
-        ];
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
-    }
-
-    public static function getNavigationBadgeColor(): string|array|null
-    {
-        return static::getModel()::count() > 10 ? 'success' : 'danger';
+        return [];
     }
 
     public static function getPages(): array

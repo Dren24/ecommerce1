@@ -19,50 +19,57 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\BrandResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\BrandResource\RelationManagers;
 
 class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-computer-desktop';
+    // Icon for motorcycle parts brands
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    // Sidebar ordering
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make([
-                    Grid::make()
-                        ->schema([
-                            TextInput::make('name')
-                                ->required()
-                                ->maxLength(225)
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(fn(string $operation, $state, Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                Section::make('Parts Brand Information')
+                    ->schema([
+                        Grid::make()
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Brand Name')
+                                    ->required()
+                                    ->maxLength(225)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(
+                                        fn(string $operation, $state, Set $set) =>
+                                        $operation === 'create'
+                                            ? $set('slug', Str::slug($state))
+                                            : null
+                                    ),
 
-                            TextInput::make('slug')
-                                ->disabled()
-                                ->required()
-                                ->dehydrated()
-                                ->unique(Brand::class, 'slug', ignoreRecord: true),
+                                TextInput::make('slug')
+                                    ->disabled()
+                                    ->required()
+                                    ->dehydrated()
+                                    ->unique(Brand::class, 'slug', ignoreRecord: true),
+                            ]),
 
-                        ]),
+                        FileUpload::make('image')
+                            ->label('Brand Logo')
+                            ->image()
+                            ->directory('brands'),
 
-                    FileUpload::make('image')
-                        ->image()
-                        ->directory('categories'),
-
-                    Toggle::make('is_active')
-                        ->required()
-                        ->default(true),
-                ])
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true)
+                            ->required(),
+                    ])
             ]);
     }
 
@@ -70,24 +77,31 @@ class BrandResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('image')
+                    ->label('Logo')
+                    ->circular(),
+
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Brand')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('slug')
+                    ->toggleable()
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
+
                 Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
                     ->boolean(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
             ])
             ->actions([
                 ActionGroup::make([
@@ -105,9 +119,7 @@ class BrandResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

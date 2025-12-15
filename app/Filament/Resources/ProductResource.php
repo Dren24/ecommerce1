@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
@@ -20,105 +19,135 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\ProductResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\ProductResource\RelationManagers;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
-
-    protected static ?int $navigationSort = 4; //berguna untuk mengurutkan menu navigasi
+    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Group::make()->schema([
-                    Section::make('Product Information')
+                    Section::make('Part Information')
                         ->schema([
                             TextInput::make('name')
+                                ->label('Part Name')
                                 ->required()
                                 ->maxLength(225)
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (string $operation, $state, Set $set) {
-                                    if ($operation !== 'create') {
-                                        return;
-                                    } else {
+                                    if ($operation === 'create') {
                                         $set('slug', Str::slug($state));
                                     }
                                 }),
 
                             TextInput::make('slug')
-                                ->required()
-                                ->unique(Product::class, 'slug', ignoreRecord: true)
+                                ->label('Slug')
                                 ->disabled()
-                                ->dehydrated(), //walau sudah disabled, dehydrated ttp akan mengambil nilai input dari form
+                                ->dehydrated()
+                                ->required()
+                                ->unique(Product::class, 'slug', ignoreRecord: true),
 
-                            MarkdownEditor::make('description')
+                            TextInput::make('description')
+                                ->label('Description')
                                 ->columnSpanFull()
-                                ->fileAttachmentsDirectory('products')
+                                ->nullable(),
                         ])->columns(2),
 
-                    Section::make('Images')
+                    Section::make('Image')
                         ->schema([
                             FileUpload::make('image')
-                                ->multiple()
+                                ->image()
                                 ->directory('products')
-                                ->maxFiles(5)
-                                ->reorderable() //memungkinkan pengguna menyeret dan menjatuhkan (drag-and-drop) baris dalam sebuah tabel untuk mengubah urutan item secara langsung
-                        ])
+                                ->label('Part Image')
+                        ]),
                 ])->columnSpan(2),
 
                 Group::make()->schema([
-                    Section::make('Price')
+
+                    Section::make('Inventory Details')
                         ->schema([
-                            TextInput::make('price')
-                                ->required()
+                            TextInput::make('quantity')
+                                ->label('Quantity')
                                 ->numeric()
-                                ->prefix('IDR')
+                                ->required()
+                                ->default(0),
+
+                            TextInput::make('minimum_quantity')
+                                ->label('Minimum Stock Alert')
+                                ->numeric()
+                                ->default(1),
+
+                            TextInput::make('part_number')
+                                ->label('Part Number')
+                                ->maxLength(255)
+                                ->nullable(),
                         ]),
 
-                    Section::make(('Associations'))
+                    Section::make('Pricing')
+                        ->schema([
+                            TextInput::make('cost_price')
+                                ->label('Cost Price')
+                                ->numeric()
+                                ->prefix('₱'),
+
+                            TextInput::make('selling_price')
+                                ->label('Selling Price')
+                                ->numeric()
+                                ->prefix('₱')
+                                ->required(),
+                        ]),
+
+                    Section::make('Fitment Details')
+                        ->schema([
+                            TextInput::make('motorcycle_brand')
+                                ->label('Motorcycle Brand')
+                                ->placeholder('e.g. Honda, Yamaha, Suzuki'),
+
+                            TextInput::make('fit_to_model')
+                                ->label('Model')
+                                ->placeholder('e.g. Mio i125, Raider R150'),
+                        ]),
+
+                    Section::make('Associations')
                         ->schema([
                             Select::make('category_id')
+                                ->label('Category')
                                 ->required()
+                                ->relationship('category', 'name')
                                 ->searchable()
-                                ->preload()
-                                ->relationship('category', 'name'), //reference from Model Brand::class : category()
+                                ->preload(),
 
                             Select::make('brand_id')
+                                ->label('Parts Brand')
                                 ->required()
+                                ->relationship('brand', 'name')
                                 ->searchable()
-                                ->preload()
-                                ->relationship('brand', 'name') //reference from Model Brand::class : brand()
+                                ->preload(),
+
+                            Select::make('supplier_id')
+                                ->label('Supplier')
+                                ->nullable()
+                                ->relationship('supplier', 'name')
+                                ->searchable()
+                                ->preload(),
                         ]),
 
                     Section::make('Status')
-                        ->schema(
-                            [
-                                Toggle::make('in_stock')
-                                    ->required()
-                                    ->default(true),
+                        ->schema([
+                            Forms\Components\Toggle::make('is_active')
+                                ->label('Active')
+                                ->default(true),
+                        ]),
 
-                                Toggle::make('is_active')
-                                    ->required()
-                                    ->default(true),
-
-                                Toggle::make('is_featured')
-                                    ->required(),
-                                Toggle::make('on_sale')
-                                    ->required()
-                            ]
-                        )
                 ])->columnSpan(1)
+
             ])->columns(3);
     }
 
@@ -126,46 +155,30 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
+                TextColumn::make('name')->label('Part Name')->searchable(),
+                TextColumn::make('category.name')->label('Category')->searchable(),
+                TextColumn::make('brand.name')->label('Brand')->searchable(),
 
-                TextColumn::make('category.name')
-                    ->searchable(),
-
-                TextColumn::make('brand.name')
-                    ->searchable(),
-
-                TextColumn::make('price')
-                    ->money('IDR')
+                TextColumn::make('quantity')
+                    ->label('Qty')
                     ->sortable(),
 
-                IconColumn::make('is_featured')
-                    ->boolean(),
+                TextColumn::make('minimum_quantity')
+                    ->label('Min')
+                    ->sortable(),
 
-                IconColumn::make('on_sale')
-                    ->boolean(),
+                TextColumn::make('selling_price')
+                    ->label('Price')
+                    ->money('PHP')
+                    ->sortable(),
 
-                IconColumn::make('in_stock')
-                    ->boolean(),
-
-                IconColumn::make('is_active')
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
                     ->boolean(),
 
                 TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true), //mengaktifkan kolom toggle, dan menonaktifkan kolom default
-
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true), //mengaktifkan kolom toggle, dan menonaktifkan kolom default
-            ])
-            ->filters([
-                SelectFilter::make('category')
-                    ->relationship('category', 'name'),
-                SelectFilter::make('brand')
-                    ->relationship('brand', 'name')
+                    ->sortable(),
             ])
             ->actions([
                 ActionGroup::make([
@@ -175,17 +188,14 @@ class ProductResource extends Resource
                 ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make()
             ]);
     }
 
+
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
