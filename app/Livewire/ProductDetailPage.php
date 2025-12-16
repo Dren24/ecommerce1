@@ -13,10 +13,13 @@ class ProductDetailPage extends Component
 {
     public $slug;
     public $quantity = 1;
+    public Product $product;
 
     public function mount($slug)
     {
-        $this->slug = $slug;
+        $this->product = Product::where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
     }
 
     public function incrementQty()
@@ -31,34 +34,39 @@ class ProductDetailPage extends Component
         }
     }
 
-    public function addToCart($product_id)
+    public function addToCart()
     {
-        // Add product with quantity
-        $total_count = CartManagement::addItemsToCart($product_id, $this->quantity);
+        // ✅ USE selling_price ONLY
+        if ($this->product->selling_price <= 0) {
+            LivewireAlert::warning()
+                ->title('Unavailable')
+                ->text('This product has no price.')
+                ->toast()
+                ->position('top-end')
+                ->show();
+            return;
+        }
 
-        // Update navbar count
+        $total_count = CartManagement::addItemsToCart(
+            $this->product->id,
+            $this->quantity
+        );
+
         $this->dispatch('update-cart-count', total_count: $total_count)
             ->to(Navbar::class);
 
-        // Alert
-        LivewireAlert::title('Success')
-            ->text('Product added to cart successfully!')
-            ->success()
+        LivewireAlert::success()
+            ->title('Added to cart')
             ->toast()
             ->position('top-end')
-            ->timer(3000)
             ->show();
     }
 
     #[Title('Product Detail Page')]
     public function render()
     {
-        $product = Product::where('slug', $this->slug)->firstOrFail();
-
         return view('livewire.product-detail-page', [
-            'product' => $product,
-            // ADD PRICE FIX HERE
-            'price' => $product->selling_price ?? 0,
+            'product' => $this->product,
         ]);
     }
 }

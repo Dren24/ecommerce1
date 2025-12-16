@@ -1,70 +1,95 @@
-<div class="w-full max-w-[85rem] py-10 px-4 sm:px-6 lg:px-8 mx-auto">
-  <h1 class="text-4xl font-bold text-slate-500">My Orders</h1>
-  <div class="flex flex-col bg-white p-5 rounded mt-4 shadow-lg">
-    <div class="-m-1.5 overflow-x-auto">
-      <div class="p-1.5 min-w-full inline-block align-middle">
-        <div class="overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead>
-              <tr>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Order</th>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Order Status</th>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Payment Status</th>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Order Amount</th>
-                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($orders as $order)
+<div class="min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div class="max-w-7xl mx-auto px-4 py-10">
 
-              @php
-                $status = '';
-                $payment_status = '';
-                if($order->status == 'new'){
-                  $status = '<span class="bg-blue-500 py-1 px-3 rounded text-white shadow">New</span>';
-                }
-                if($order->status == 'processing'){
-                  $status = '<span class="bg-yellow-500 py-1 px-3 rounded text-white shadow">Processing</span>';
-                }
-                if($order->status == 'shipped'){
-                  $status = '<span class="bg-green-500 py-1 px-3 rounded text-white shadow">Shipped</span>';
-                }
-                if($order->status == 'delivered'){
-                  $status = '<span class="bg-green-700 py-1 px-3 rounded text-white shadow">Delivered</span>';
-                }
-                if($order->status == 'cancelled'){
-                  $status = '<span class="bg-red-500 py-1 px-3 rounded text-white shadow">Cancelled</span>';
-                }
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+            My Orders
+        </h1>
 
-                if($order->payment_status == 'pending'){
-                  $payment_status = '<span class="bg-blue-500 py-1 px-3 rounded text-white shadow">Pending</span>';
-                }
-                if($order->payment_status == 'paid'){
-                  $payment_status = '<span class="bg-green-500 py-1 px-3 rounded text-white shadow">Paid</span>';
-                }
-                if($order->payment_status == 'failed'){
-                  $payment_status = '<span class="bg-red-500 py-1 px-3 rounded text-white shadow">Failed</span>';
-                }
-              @endphp
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow overflow-x-auto">
 
-              <tr class="odd:bg-white even:bg-gray-100 dark:odd:bg-slate-900 dark:even:bg-slate-800" wire:key='{{ $order->id }}'>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{{ $order->id }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ $order->created_at->format('d-m-Y') }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{!! $status !!}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{!! $payment_status !!}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ Number::currency($order->grand_total) }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                  <a href="/myorders/{{ $order->id }}" class="bg-slate-600 text-white py-2 px-4 rounded-md hover:bg-slate-500">View Details</a>
-                </td>
-              </tr>
-              @endforeach
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-slate-50 dark:bg-slate-800">
+                    <tr class="text-xs uppercase text-gray-500 dark:text-gray-400">
+                        <th class="px-6 py-3 text-left">Order #</th>
+                        <th class="px-6 py-3 text-left">Date</th>
+                        <th class="px-6 py-3 text-left">Order Status</th>
+                        <th class="px-6 py-3 text-left">Payment</th>
+                        <th class="px-6 py-3 text-left">Amount (PHP)</th>
+                        <th class="px-6 py-3 text-right">Action</th>
+                    </tr>
+                </thead>
 
-            </tbody>
-          </table>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse ($orders as $order)
+
+                        @php
+                            $orderStatusColors = [
+                                'new' => 'bg-blue-500',
+                                'processing' => 'bg-yellow-500',
+                                'shipped' => 'bg-indigo-500',
+                                'delivered' => 'bg-green-600',
+                                'cancelled' => 'bg-red-500',
+                            ];
+
+                            $paymentStatusColors = [
+                                'pending' => 'bg-yellow-500',
+                                'paid' => 'bg-green-600',
+                                'failed' => 'bg-red-500',
+                            ];
+                        @endphp
+
+                        <tr wire:key="order-{{ $order->id }}">
+                            <td class="px-6 py-4 font-medium text-gray-800 dark:text-gray-200">
+                                #{{ $order->id }}
+                            </td>
+
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+                                {{ $order->created_at->format('d M Y') }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <span class="text-white text-xs px-3 py-1 rounded-full
+                                    {{ $orderStatusColors[$order->status] ?? 'bg-gray-500' }}">
+                                    {{ ucfirst($order->status) }}
+                                </span>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <span class="text-white text-xs px-3 py-1 rounded-full
+                                    {{ $paymentStatusColors[$order->payment_status] ?? 'bg-gray-500' }}">
+                                    {{ ucfirst($order->payment_status) }}
+                                </span>
+                            </td>
+
+                            <td class="px-6 py-4 font-semibold text-gray-800 dark:text-gray-200">
+                                {{ Number::currency($order->grand_total, 'PHP') }}
+                            </td>
+
+                            <td class="px-6 py-4 text-right">
+                                <a href="{{ route('myorders.show', $order->id) }}"
+                                   class="inline-flex items-center px-4 py-2 rounded-lg
+                                          bg-indigo-600 hover:bg-indigo-700 text-white text-sm">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                You have no orders yet.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
         </div>
-      </div>
-      {{ $orders->links() }}
+
+        <!-- PAGINATION -->
+        <div class="mt-6">
+            {{ $orders->links() }}
+        </div>
+
     </div>
-  </div>
 </div>

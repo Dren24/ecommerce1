@@ -14,19 +14,13 @@
                 </p>
             </div>
 
-            <!-- PRODUCT LINKS -->
+            <!-- PRODUCTS -->
             <div>
                 <h4 class="font-semibold text-white">Products</h4>
                 <ul class="mt-4 space-y-3 text-sm">
-                    <li>
-                        <a href="/categories" class="hover:text-white">Categories</a>
-                    </li>
-                    <li>
-                        <a href="/products" class="hover:text-white">All Products</a>
-                    </li>
-                    <li>
-                        <a href="/products" class="hover:text-white">Featured Products</a>
-                    </li>
+                    <li><a href="/categories" class="hover:text-white">Categories</a></li>
+                    <li><a href="/products" class="hover:text-white">All Products</a></li>
+                    <li><a href="/products" class="hover:text-white">Featured Products</a></li>
                 </ul>
             </div>
 
@@ -43,13 +37,16 @@
             <!-- SUBSCRIBE -->
             <div class="col-span-2">
                 <h4 class="font-semibold text-white">Stay Updated</h4>
-                <p class="mt-2 text-gray-400 text-sm">Get updates on new parts & promotions</p>
+                <p class="mt-2 text-gray-400 text-sm">
+                    Get updates on new parts & promotions
+                </p>
 
                 <form class="mt-4">
                     <div class="flex flex-col sm:flex-row bg-gray-800 rounded-lg p-2 gap-2">
                         <input
                             type="email"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-900 text-sm border border-gray-700 focus:border-blue-500 focus:ring-blue-500"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-900 text-sm border border-gray-700
+                                   focus:border-blue-500 focus:ring-blue-500 text-gray-200"
                             placeholder="Enter your email"
                         >
                         <button
@@ -63,9 +60,8 @@
             </div>
 
         </div>
-        <!-- End Grid -->
 
-        <!-- Bottom Section -->
+        <!-- Bottom -->
         <div class="mt-10 border-t border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-between">
 
             <p class="text-sm text-gray-400">
@@ -75,31 +71,17 @@
             <!-- Social Icons -->
             <div class="flex gap-3 mt-4 sm:mt-0">
 
-                <!-- Facebook -->
                 <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05..."/>
+                    <span class="sr-only">Facebook</span>
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.1 3-3.1.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2V12h2.3l-.4 3h-1.9v7A10 10 0 0022 12z"/>
                     </svg>
                 </a>
 
-                <!-- Google -->
                 <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M15.545 6.558a9.42 9.42 0 01.139 1.626c0 2.434..."/>
-                    </svg>
-                </a>
-
-                <!-- Twitter/X -->
-                <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334..."/>
-                    </svg>
-                </a>
-
-                <!-- GitHub -->
-                <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29..."/>
+                    <span class="sr-only">GitHub</span>
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 .5A12 12 0 000 12.6c0 5.4 3.4 10 8.2 11.6.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.6-1.5-1.4-1.9-1.4-1.9-1.1-.8.1-.8.1-.8 1.2.1 1.8 1.3 1.8 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 015.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2.1v3.1c0 .3.2.7.8.6A12 12 0 0024 12.6 12 12 0 0012 .5z"/>
                     </svg>
                 </a>
 

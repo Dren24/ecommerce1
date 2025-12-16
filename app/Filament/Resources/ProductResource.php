@@ -2,30 +2,29 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
 use App\Models\Product;
-use Filament\Forms\Set;
+use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Resources\Resource;
+use Filament\Forms\Set;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use App\Filament\Resources\ProductResource\Pages;
+use Filament\Forms\Components\Select;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Support\Str;
+use App\Filament\Resources\ProductResource\Pages;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?int $navigationSort = 4;
 
@@ -39,9 +38,7 @@ class ProductResource extends Resource
                     Section::make('Part Information')
                         ->schema([
                             TextInput::make('name')
-                                ->label('Part Name')
                                 ->required()
-                                ->maxLength(225)
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (string $operation, $state, Set $set) {
                                     if ($operation === 'create') {
@@ -50,24 +47,20 @@ class ProductResource extends Resource
                                 }),
 
                             TextInput::make('slug')
-                                ->label('Slug')
                                 ->disabled()
                                 ->dehydrated()
                                 ->required()
                                 ->unique(Product::class, 'slug', ignoreRecord: true),
 
                             TextInput::make('description')
-                                ->label('Description')
-                                ->columnSpanFull()
-                                ->nullable(),
+                                ->columnSpanFull(),
                         ])->columns(2),
 
                     Section::make('Image')
                         ->schema([
                             FileUpload::make('image')
                                 ->directory('products')
-                                ->image()
-                                ->label('Part Image')
+                                ->image(),
                         ]),
 
                 ])->columnSpan(2),
@@ -78,21 +71,19 @@ class ProductResource extends Resource
                         ->schema([
                             TextInput::make('quantity')
                                 ->numeric()
-                                ->required()
-                                ->default(0),
+                                ->default(0)
+                                ->required(),
 
                             TextInput::make('minimum_quantity')
                                 ->numeric()
                                 ->default(1),
 
-                            TextInput::make('part_number')
-                                ->label('Part Number')
-                                ->nullable(),
+                            TextInput::make('part_number'),
                         ]),
 
                     Section::make('Pricing')
                         ->schema([
-                            TextInput::make('price')        // ✔ FIXED
+                            TextInput::make('selling_price') // ✅ FIX
                                 ->label('Price')
                                 ->numeric()
                                 ->prefix('₱')
@@ -101,11 +92,8 @@ class ProductResource extends Resource
 
                     Section::make('Fitment Details')
                         ->schema([
-                            TextInput::make('motorcycle_brand')
-                                ->placeholder('e.g. Honda'),
-
-                            TextInput::make('fit_to_model')
-                                ->placeholder('e.g. Mio i125'),
+                            TextInput::make('motorcycle_brand'),
+                            TextInput::make('fit_to_model'),
                         ]),
 
                     Section::make('Associations')
@@ -132,7 +120,6 @@ class ProductResource extends Resource
                     Section::make('Status')
                         ->schema([
                             Forms\Components\Toggle::make('is_active')
-                                ->label('Active')
                                 ->default(true),
                         ]),
                 ])->columnSpan(1),
@@ -147,22 +134,22 @@ class ProductResource extends Resource
             ->columns([
                 TextColumn::make('name')->searchable(),
 
-                TextColumn::make('category.name')->label('Category')->searchable(),
+                TextColumn::make('category.name')->label('Category'),
 
-                TextColumn::make('brand.name')->label('Brand')->searchable(),
+                TextColumn::make('brand.name')->label('Brand'),
 
                 TextColumn::make('quantity')->sortable(),
 
                 TextColumn::make('minimum_quantity')->sortable(),
 
-                TextColumn::make('price')            // ✔ FIXED
+                TextColumn::make('selling_price') // ✅ FIX
                     ->label('Price')
                     ->money('PHP')
                     ->sortable(),
 
                 Tables\Columns\IconColumn::make('is_active')->boolean(),
 
-                TextColumn::make('created_at')->dateTime()->sortable(),
+                TextColumn::make('created_at')->dateTime(),
             ])
             ->actions([
                 ActionGroup::make([
@@ -172,21 +159,16 @@ class ProductResource extends Resource
                 ])
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make()
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProducts::route('/'),
+            'index'  => Pages\ListProducts::route('/'),
             'create' => Pages\CreateProduct::route('/create'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'edit'   => Pages\EditProduct::route('/{record}/edit'),
         ];
     }
 }

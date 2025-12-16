@@ -2,30 +2,32 @@
 
 namespace App\Livewire;
 
-use App\Models\address;
 use App\Models\Order;
-use App\Models\OrderItem;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('My Order')]
+#[Title('Order Details')]
 class MyOrderDetailPage extends Component
 {
-    public $order_id;
-    public function mount($order_id)
+    public Order $order;
+
+    public $order_items;
+    public $address;
+
+    // ✅ MUST MATCH ROUTE PARAM {order}
+    public function mount(Order $order)
     {
-        $this->order_id = $order_id;
+        // Security: user can only see their own orders
+        abort_if($order->user_id !== Auth::id(), 403);
+
+        $this->order = $order;
+        $this->order_items = $order->items()->with('product')->get();
+        $this->address = $order->address;
     }
+
     public function render()
     {
-        $order_items = OrderItem::with('product')->where('order_id', $this->order_id)->get();
-        $address = address::where('order_id', $this->order_id)->first();
-        $order = Order::where('id', $this->order_id)->first();
-
-        return view('livewire.my-order-detail-page', [
-            'order_items' => $order_items,
-            'address' => $address,
-            'order' => $order,
-        ]);
+        return view('livewire.my-order-detail-page');
     }
 }

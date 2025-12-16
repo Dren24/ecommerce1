@@ -21,25 +21,26 @@ class Product extends Model
         'part_number',
         'motorcycle_brand',
         'fit_to_model',
-        'price',            // ✔ FIXED
+        'selling_price', // ✅ FIX
         'image',
         'is_active',
     ];
 
     protected $casts = [
-        'image' => 'string',
-        'is_active' => 'boolean',
-        'price' => 'decimal:2',   // ✔ FIXED
+        'is_active'     => 'boolean',
+        'selling_price' => 'decimal:2', // ✅ FIX
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);
     }
+
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);

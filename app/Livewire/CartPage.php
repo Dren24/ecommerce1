@@ -11,51 +11,48 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 class CartPage extends Component
 {
     #[Title('Cart Page')]
-    public $cart_items = [];
-    public $grand_total;
+    public array $cart_items = [];
+    public float $grand_total = 0;
 
     public function mount()
     {
+        $this->refreshCart();
+    }
+
+    private function refreshCart(): void
+    {
         $this->cart_items = CartManagement::getCartItemsFromCookie();
         $this->grand_total = CartManagement::calculateGrandTotal($this->cart_items);
+
+        $this->dispatch(
+            'update-cart-count',
+            total_count: CartManagement::getTotalQuantity($this->cart_items)
+        )->to(Navbar::class);
     }
 
-    public function increaseQty($product_id)
+    public function increaseQty(int $product_id): void
     {
-        $this->cart_items = CartManagement::incrementQuantityToCartItem($product_id);
-        $this->grand_total = CartManagement::calculateGrandTotal($this->cart_items);
-
-        // Update total quantity in Navbar
-        $total_count = CartManagement::getTotalQuantity($this->cart_items);
-        $this->dispatch('update-cart-count', total_count: $total_count)->to(Navbar::class);
+        CartManagement::incrementQuantityToCartItem($product_id);
+        $this->refreshCart();
     }
 
-    public function decreaseQty($product_id)
+    public function decreaseQty(int $product_id): void
     {
-        $this->cart_items = CartManagement::decrementQuantityToCartItem($product_id);
-        $this->grand_total = CartManagement::calculateGrandTotal($this->cart_items);
-
-        // Update total quantity in Navbar
-        $total_count = CartManagement::getTotalQuantity($this->cart_items);
-        $this->dispatch('update-cart-count', total_count: $total_count)->to(Navbar::class);
+        CartManagement::decrementQuantityToCartItem($product_id);
+        $this->refreshCart();
     }
 
-    public function removeItem($product_id)
+    public function removeItem(int $product_id): void
     {
-        $this->cart_items = CartManagement::removeCartItem($product_id);
-        $this->grand_total = CartManagement::calculateGrandTotal($this->cart_items);
+        CartManagement::removeCartItem($product_id);
+        $this->refreshCart();
 
-        // Update total quantity in Navbar
-        $total_count = CartManagement::getTotalQuantity($this->cart_items);
-        $this->dispatch('update-cart-count', total_count: $total_count)->to(Navbar::class);
-
-        // Show alert
-        LivewireAlert::title('Success')
-            ->text('Product removed from cart!')
+        LivewireAlert::title('Removed')
+            ->text('Product removed from cart')
             ->success()
             ->toast()
             ->position('bottom-end')
-            ->timer(3000)
+            ->timer(2500)
             ->show();
     }
 

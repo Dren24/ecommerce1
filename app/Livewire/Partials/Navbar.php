@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Partials;
 
+use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Helpers\CartManagement;
-use Livewire\Component;
 
 class Navbar extends Component
 {
@@ -12,14 +12,13 @@ class Navbar extends Component
 
     public function mount()
     {
-        // Safely count cart items from cookie
-        $this->total_count = count(CartManagement::getCartItemsFromCookie());
+        $this->total_count = CartManagement::getTotalQuantity();
     }
 
     #[On('update-cart-count')]
-    public function updateCartCount(int $total)
+    public function updateCartCount(int $total_count)
     {
-        $this->total_count = $total;
+        $this->total_count = $total_count;
     }
 
     public function render()

@@ -1,115 +1,90 @@
-<div>
-    <div class="w-full max-w-[85rem] py-10 px-4 sm:px-6 lg:px-8 mx-auto">
+<div class="w-full max-w-[85rem] mx-auto py-10 px-4">
 
-        <section class="overflow-hidden bg-white py-11 font-poppins dark:bg-gray-800">
-            <div class="max-w-6xl px-4 py-4 mx-auto lg:py-8 md:px-6">
-                <div class="flex flex-wrap -mx-4">
+    @php
+        // IMAGE
+        $image = asset('images/no-image.png');
+        if (!empty($product->image)) {
+            $image = asset('storage/products/' . str_replace('products/', '', $product->image));
+        }
 
-                    {{-- ========================================= --}}
-                    {{--                IMAGE SECTION               --}}
-                    {{-- ========================================= --}}
-                    @php
-                        // MAIN IMAGE (single string)
-                        $mainImage = $product->image;
+        // PRICE (DB COLUMN = selling_price)
+        $price = (float) ($product->selling_price ?? 0);
+    @endphp
 
-                        // Clean duplicate folder
-                        $mainImage = str_replace('products/', '', $mainImage);
+    <section class="bg-white dark:bg-gray-800 rounded-lg p-6">
+        <div class="flex flex-wrap -mx-4">
 
-                        $mainImageUrl = $mainImage
-                            ? asset('storage/products/' . $mainImage)
-                            : asset('noimage.png');
-                    @endphp
+            {{-- IMAGE --}}
+            <div class="w-full md:w-1/2 px-4 mb-8">
+                <img
+                    src="{{ $image }}"
+                    class="w-full rounded-lg object-cover"
+                    onerror="this.src='{{ asset('images/no-image.png') }}'">
+            </div>
 
-                    <div class="w-full mb-8 md:w-1/2 md:mb-0"
-                        x-data="{ mainImage: '{{ $mainImageUrl }}' }">
+            {{-- INFO --}}
+            <div class="w-full md:w-1/2 px-4">
+                <div class="lg:pl-12">
 
-                        <div class="sticky top-0 overflow-hidden">
+                    {{-- NAME --}}
+                    <h1 class="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+                        {{ $product->name }}
+                    </h1>
 
-                            {{-- MAIN IMAGE --}}
-                            <div class="relative mb-6 lg:mb-10 lg:h-2/4">
-                                <img x-bind:src="mainImage"
-                                     class="object-cover w-full lg:h-full"
-                                     onerror="this.src='/noimage.png'">
-                            </div>
+                    {{-- PRICE --}}
+                    <p class="text-4xl font-bold mb-4 text-gray-800 dark:text-gray-300">
+                        {{ Number::currency($price, 'PHP') }}
+                    </p>
 
-                            {{-- **THUMBNAIL — ONLY ONE IMAGE (NO LOOP)** --}}
-                            <div class="flex-wrap hidden md:flex">
+                    @if($price <= 0)
+                        <p class="text-red-500 mb-4">
+                            Price not available for this product
+                        </p>
+                    @endif
 
-                                @php
-                                    $thumbUrl = $mainImageUrl;
-                                @endphp
-
-                                <div class="w-1/2 p-2 sm:w-1/4"
-                                     x-on:click="mainImage='{{ $thumbUrl }}'">
-
-                                    <img src="{{ $thumbUrl }}"
-                                         class="object-cover w-full lg:h-20 cursor-pointer hover:border hover:border-blue-500"
-                                         onerror="this.src='/noimage.png'">
-                                </div>
-
-                            </div>
-
-                        </div>
+                    {{-- DESCRIPTION --}}
+                    <div class="text-gray-700 dark:text-gray-400 mb-6 leading-relaxed">
+                        {!! Str::markdown($product->description ?? 'No description available.') !!}
                     </div>
 
-                    {{-- ========================================= --}}
-                    {{--            PRODUCT INFORMATION             --}}
-                    {{-- ========================================= --}}
-                    <div class="w-full px-4 md:w-1/2">
-                        <div class="lg:pl-20">
+                    {{-- QUANTITY --}}
+                    <label class="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+                        Quantity
+                    </label>
 
-                            {{-- PRODUCT NAME --}}
-                            <h2 class="text-3xl md:text-4xl font-bold dark:text-gray-300 mb-4">
-                                {{ $product->name }}
-                            </h2>
+                    <div class="flex items-center w-48 h-14 bg-gray-200 dark:bg-gray-900 rounded-xl overflow-hidden mb-6">
+                        <button
+                            wire:click="decrementQty"
+                            class="w-16 h-full text-2xl font-bold hover:bg-gray-300 dark:hover:bg-gray-700">
+                            −
+                        </button>
 
-                            {{-- PRICE --}}
-                            <p class="mb-6 text-4xl font-bold text-gray-700 dark:text-gray-300">
-                                {{ Number::currency($product->price ?? 0, 'PHP') }}
-                            </p>
+                        <input
+                            type="number"
+                            readonly
+                            wire:model="quantity"
+                            class="w-16 h-full text-center bg-transparent text-lg font-semibold">
 
-                            {{-- DESCRIPTION --}}
-                            <p class="text-gray-700 dark:text-gray-400 leading-relaxed">
-                                {!! Str::markdown($product->description) !!}
-                            </p>
-
-                            {{-- QUANTITY --}}
-                            <div class="w-32 mt-8">
-                                <label class="text-lg font-semibold text-gray-700 dark:text-gray-400">
-                                    Quantity
-                                </label>
-
-                                <div class="relative flex w-full h-10 mt-3">
-                                    <button wire:click="decrementQty"
-                                        class="w-10 bg-gray-300 dark:bg-gray-900 rounded-l hover:bg-gray-400">
-                                        -
-                                    </button>
-
-                                    <input type="number" readonly wire:model="quantity"
-                                        class="flex-1 bg-gray-300 dark:bg-gray-900 text-center">
-
-                                    <button wire:click="incrementQty"
-                                        class="w-10 bg-gray-300 dark:bg-gray-900 rounded-r hover:bg-gray-400">
-                                        +
-                                    </button>
-                                </div>
-                            </div>
-
-                            {{-- ADD TO CART --}}
-                            <div class="mt-8">
-                                <button wire:click="addToCart({{ $product->id }})"
-                                    class="w-full lg:w-2/5 p-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                    <span wire:loading.remove wire:target="addToCart({{ $product->id }})">Add to Cart</span>
-                                    <span wire:loading wire:target="addToCart({{ $product->id }})">Loading…</span>
-                                </button>
-                            </div>
-
-                        </div>
+                        <button
+                            wire:click="incrementQty"
+                            class="w-16 h-full text-2xl font-bold hover:bg-gray-300 dark:hover:bg-gray-700">
+                            +
+                        </button>
                     </div>
+
+                    {{-- ADD TO CART --}}
+                    <button
+                        wire:click="addToCart"
+                        @disabled($price <= 0)
+                        class="w-full lg:w-2/5 py-4 text-lg rounded-lg text-white
+                               bg-blue-600 hover:bg-blue-700
+                               disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        Add to Cart
+                    </button>
 
                 </div>
             </div>
-        </section>
 
-    </div>
+        </div>
+    </section>
 </div>

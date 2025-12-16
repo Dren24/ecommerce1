@@ -1,12 +1,15 @@
 <x-mail::message>
-# Order Placed SUCCESSFULLY
+# Order Placed Successfully 🎉
 
-THANK YOU FOR THE ORDER. YOUR ORDER NUMBER IS: {{ $order->id }}.
+Thank you for your order.
+
+**Order Number:** {{ $order->id }}  
+**Total Amount:** ₱{{ number_format($order->grand_total, 2) }}
 
 <x-mail::button :url="$url">
 View Order
 </x-mail::button>
 
-Thanks,<br>
+Thanks,  
 {{ config('app.name') }}
 </x-mail::message>

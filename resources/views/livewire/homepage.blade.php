@@ -1,36 +1,42 @@
 <div>
 
-{{-- Hero section start --}}
-<div class="w-full h-screen bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 py-10 px-4 sm:px-6 lg:px-8 mx-auto">
+{{-- ================= HERO SECTION ================= --}}
+<div class="w-full h-screen
+    bg-white
+    dark:bg-gradient-to-r dark:from-slate-900 dark:via-slate-800 dark:to-slate-700
+    py-10 px-4 sm:px-6 lg:px-8 mx-auto">
+
     <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <div class="grid md:grid-cols-2 gap-6 md:gap-12 xl:gap-20 md:items-center">
 
             {{-- LEFT CONTENT --}}
             <div>
-                <h1 class="block text-4xl font-bold text-white sm:text-5xl lg:text-6xl leading-tight">
-                    Upgrade Your Ride with 
+                <h1 class="block text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl lg:text-6xl leading-tight">
+                    Upgrade Your Ride with
                     <span class="text-blue-500">RevnoParts</span>
                 </h1>
 
-                <p class="mt-4 text-lg text-gray-300 max-w-lg">
-                    High-quality motorcycle parts including brake systems, levers, sprockets, exhausts, 
+                <p class="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-lg">
+                    High-quality motorcycle parts including brake systems, levers, sprockets, exhausts,
                     handlebars, and more. Built for performance. Trusted by riders.
                 </p>
 
                 {{-- BUTTONS --}}
                 <div class="mt-8 flex gap-3">
                     <a href="/products"
-                        class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                       class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold
+                              rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                         Shop Now
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m9 18 6-6-6-6" />
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 18 6-6-6-6"/>
                         </svg>
                     </a>
 
                     <a href="/categories"
-                        class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg bg-white text-gray-800 hover:bg-gray-100">
+                       class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold
+                              rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200
+                              dark:bg-white dark:text-gray-800">
                         Browse Categories
                     </a>
                 </div>
@@ -38,23 +44,24 @@
                 {{-- TRUST BADGES --}}
                 <div class="mt-10 grid grid-cols-2 gap-6">
                     <div>
-                        <p class="text-white text-xl font-bold">4.9 / 5</p>
-                        <p class="text-gray-300 text-sm">Based on 15k rider reviews</p>
-                        <p class="text-gray-400 text-sm mt-2">Google Reviews</p>
+                        <p class="text-gray-900 dark:text-white text-xl font-bold">4.9 / 5</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">Based on 15k rider reviews</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Google Reviews</p>
                     </div>
+
                     <div>
-                        <p class="text-white text-xl font-bold">Top Rated</p>
-                        <p class="text-gray-300 text-sm">Featured in MotoPerformance</p>
-                        <p class="text-gray-400 text-sm mt-2">2024 Award</p>
+                        <p class="text-gray-900 dark:text-white text-xl font-bold">Top Rated</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">Featured in MotoPerformance</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">2024 Award</p>
                     </div>
                 </div>
             </div>
 
             {{-- RIGHT IMAGE --}}
             <div class="relative">
-                <img class="w-full rounded-xl shadow-lg" 
-                    src="https://i.ibb.co/Q3YW0kXH/Chat-GPT-Image-Dec-15-2025-07-47-33-PM.png"
-                    alt="Motorcycle Parts Hero Image">
+                <img class="w-full rounded-xl shadow-lg"
+                     src="https://i.ibb.co/Q3YW0kXH/Chat-GPT-Image-Dec-15-2025-07-47-33-PM.png"
+                     alt="Motorcycle Parts Hero Image">
 
                 <div class="absolute inset-0 bg-gradient-to-tr from-black/30 to-transparent rounded-xl"></div>
             </div>
@@ -62,7 +69,9 @@
         </div>
     </div>
 </div>
-{{-- Hero section end --}}
+{{-- ================= END HERO ================= --}}
+
+
 
 
 {{-- Brand Section Start --}}
@@ -203,42 +212,110 @@
 
     <div class="max-w-6xl mx-auto mt-14 px-4 grid md:grid-cols-2 gap-8">
 
-        {{-- Review Cards --}}
-        @include('partials.review-card', [
-            'name' => 'Adren Roy',
-            'role' => 'Rider / Web Designer',
-            'image' => 'https://i.postimg.cc/rF6G0Dh9/pexels-emmy-e-2381069.jpg',
-            'text' => 'RevnoParts never disappoints. The brake kit I ordered was high quality and arrived fast. Highly recommended!',
-            'rating' => 5
-        ])
+        {{-- Review 1 --}}
+        <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex items-center gap-4">
+                <img src="https://i.postimg.cc/rF6G0Dh9/pexels-emmy-e-2381069.jpg"
+                     class="w-14 h-14 rounded-full object-cover">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200">Adren Roy</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Rider / Web Designer</p>
+                </div>
+            </div>
 
-        @include('partials.review-card', [
-            'name' => 'Sonira Roy',
-            'role' => 'Manager',
-            'image' => 'https://i.postimg.cc/q7pv50zT/pexels-edmond-dant-s-4342352.jpg',
-            'text' => 'Excellent customer service and authentic motorcycle parts. I’m definitely ordering again.',
-            'rating' => 5
-        ])
+            <p class="mt-4 text-gray-600 dark:text-gray-400">
+                RevnoParts never disappoints. The brake kit I ordered was high quality and arrived fast.
+                Highly recommended!
+            </p>
 
-        @include('partials.review-card', [
-            'name' => 'William Harry',
-            'role' => 'Marketing Officer',
-            'image' => 'https://i.postimg.cc/JzmrHQmk/pexels-pixabay-220453.jpg',
-            'text' => 'The rims I ordered are solid! Good price and fast shipping. RevnoParts is my go-to shop now.',
-            'rating' => 4
-        ])
+            <div class="mt-4 flex items-center gap-1">
+                @for ($i = 0; $i < 5; $i++)
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor">
+                        <polygon points="9.9,1.1 12.2,6.9 18.4,7.3 13.6,11.3 15.2,17.4 9.9,14.1 4.6,17.4 6.2,11.3 1.4,7.3 7.6,6.9"/>
+                    </svg>
+                @endfor
+                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">5.0</span>
+            </div>
+        </div>
 
-        @include('partials.review-card', [
-            'name' => 'James Jack',
-            'role' => 'Programmer',
-            'image' => 'https://i.postimg.cc/4NMZPYdh/pexels-dinielle-de-veyra-4195342.jpg',
-            'text' => 'High-quality mufflers at a good price. My bike sounds and performs way better. 10/10!',
-            'rating' => 5
-        ])
+        {{-- Review 2 --}}
+        <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex items-center gap-4">
+                <img src="https://i.postimg.cc/q7pv50zT/pexels-edmond-dant-s-4342352.jpg"
+                     class="w-14 h-14 rounded-full object-cover">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200">Sonira Roy</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Manager</p>
+                </div>
+            </div>
+
+            <p class="mt-4 text-gray-600 dark:text-gray-400">
+                Excellent customer service and authentic motorcycle parts. I’m definitely ordering again.
+            </p>
+
+            <div class="mt-4 flex items-center gap-1">
+                @for ($i = 0; $i < 5; $i++)
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor">
+                        <polygon points="9.9,1.1 12.2,6.9 18.4,7.3 13.6,11.3 15.2,17.4 9.9,14.1 4.6,17.4 6.2,11.3 1.4,7.3 7.6,6.9"/>
+                    </svg>
+                @endfor
+                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">5.0</span>
+            </div>
+        </div>
+
+        {{-- Review 3 --}}
+        <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex items-center gap-4">
+                <img src="https://i.postimg.cc/JzmrHQmk/pexels-pixabay-220453.jpg"
+                     class="w-14 h-14 rounded-full object-cover">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200">William Harry</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Marketing Officer</p>
+                </div>
+            </div>
+
+            <p class="mt-4 text-gray-600 dark:text-gray-400">
+                The rims I ordered are solid! Good price and fast shipping. RevnoParts is my go-to shop now.
+            </p>
+
+            <div class="mt-4 flex items-center gap-1">
+                @for ($i = 0; $i < 4; $i++)
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor">
+                        <polygon points="9.9,1.1 12.2,6.9 18.4,7.3 13.6,11.3 15.2,17.4 9.9,14.1 4.6,17.4 6.2,11.3 1.4,7.3 7.6,6.9"/>
+                    </svg>
+                @endfor
+                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">4.0</span>
+            </div>
+        </div>
+
+        {{-- Review 4 --}}
+        <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex items-center gap-4">
+                <img src="https://i.postimg.cc/4NMZPYdh/pexels-dinielle-de-veyra-4195342.jpg"
+                     class="w-14 h-14 rounded-full object-cover">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200">James Jack</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Programmer</p>
+                </div>
+            </div>
+
+            <p class="mt-4 text-gray-600 dark:text-gray-400">
+                High-quality mufflers at a good price. My bike sounds and performs way better. 10/10!
+            </p>
+
+            <div class="mt-4 flex items-center gap-1">
+                @for ($i = 0; $i < 5; $i++)
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor">
+                        <polygon points="9.9,1.1 12.2,6.9 18.4,7.3 13.6,11.3 15.2,17.4 9.9,14.1 4.6,17.4 6.2,11.3 1.4,7.3 7.6,6.9"/>
+                    </svg>
+                @endfor
+                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">5.0</span>
+            </div>
+        </div>
 
     </div>
-
 </section>
 {{-- Customer Reviews End --}}
+
 
 </div>
