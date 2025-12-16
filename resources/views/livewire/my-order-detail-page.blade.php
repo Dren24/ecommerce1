@@ -7,7 +7,7 @@
 
         @php
             $shipping = $order->shipping_amount ?? 0;
-            $subtotal = max($order->grand_total - $shipping, 0);
+            $subtotal = max(($order->grand_total ?? 0) - $shipping, 0);
         @endphp
 
         <!-- INFO CARDS -->
@@ -15,12 +15,16 @@
 
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-5">
                 <p class="text-xs text-gray-500 uppercase mb-1">Customer</p>
-                <p class="font-semibold">{{ $address->first_name }} {{ $address->last_name }}</p>
+                <p class="font-semibold">
+                    {{ $address->first_name }} {{ $address->last_name }}
+                </p>
             </div>
 
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-5">
                 <p class="text-xs text-gray-500 uppercase mb-1">Order Date</p>
-                <p class="font-semibold">{{ $order->created_at->format('d M Y') }}</p>
+                <p class="font-semibold">
+                    {{ $order->created_at->format('d M Y') }}
+                </p>
             </div>
 
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-5">
@@ -59,9 +63,17 @@
                         @foreach($order_items as $item)
                             @php
                                 $image = asset('images/no-image.png');
+
                                 if (!empty($item->product?->image)) {
-                                    $image = asset('storage/products/' . str_replace('products/', '', $item->product->image));
+                                    $image = asset(
+                                        'storage/products/' .
+                                        str_replace('products/', '', $item->product->image)
+                                    );
                                 }
+
+                                $price = $item->price ?? 0;
+                                $qty   = $item->quantity ?? 0;
+                                $lineTotal = $price * $qty;
                             @endphp
 
                             <tr class="border-b last:border-none">
@@ -76,9 +88,9 @@
                                     </div>
                                 </td>
 
-                                <td>{{ Number::currency($item->unit_amount, 'PHP') }}</td>
-                                <td>{{ $item->quantity }}</td>
-                                <td>{{ Number::currency($item->total_amount, 'PHP') }}</td>
+                                <td>{{ Number::currency($price, 'PHP') }}</td>
+                                <td>{{ $qty }}</td>
+                                <td>{{ Number::currency($lineTotal, 'PHP') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -103,7 +115,7 @@
 
                 <div class="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>{{ Number::currency($order->grand_total, 'PHP') }}</span>
+                    <span>{{ Number::currency($order->grand_total ?? 0, 'PHP') }}</span>
                 </div>
 
                 <div class="mt-6 text-sm">
